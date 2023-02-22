@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript">
+            (function(window) {
+                const DIRECTIONS = [
+                    { dx: -1, dy: 0 },
+                    { dx: +1, dy: 0 },
+                    { dx: 0, dy: -1 },
+                    { dx: 0, dy: +1 },
+                ];
+
+                let el = {};
+                let matrix = [];
+                let width = 0;
+                let height = 0;
+
+                function clearHighlights() {
+                    for (const c of el.matrix.children) {
+                        c.classList.remove('highlight');
+                    }
+                }
+
+                function traverseTree(x, y, tail, path) {
+                    if (matrix[x][y] !== tail[0]) {
+                        return false;
+                    }
+                    path.push({x: x, y: y});
+                    tail.shift();
+                    if (tail.length === 0) {
+                        return true;
+                    }
+                    let hasPath = false;
+                    for (const d of DIRECTIONS) {
+                        let { dx, dy } = d;
+                        let i = (width + x + dx) % width;
+                        let j = (height + y + dy) % height;
+                        hasPath ||= traverseTree(i, j, [...tail], path);
+                    }
+                    if (hasPath) {
+                        return true;
+                    }
+                    path.pop();
+                    return false;
+                }
+
+                function findWord(word) {
+                    word = word.split('');
+                    let paths = [];
+                    for (let x = 0; x < width; ++x) {
+                        for (let y = 0; y < height; ++y) {
+                            let path = []
+                            traverseTree(x, y, [...word], path);
+                            if (path.length === word.length) {
+                                paths.push(path);
+                            }
+                        }
+                    }
+                    return paths;
+                }
+
+                function onWordChange(e) {
+                    clearHighlights();
+                    e.target.value = e.target.value.toUpperCase();
+                    let paths = findWord(e.target.value);
+                    for (const path of paths) {
+                        for (const coord of path) {
+                            let cell = document.querySelector(`#cell-${coord.x}-${coord.y}`);
+                            cell.className = 'highlight';
+                        }
+                    }
+                }
+
+                function buildMatrix() {
+                    let m = el.pasted.value.replace(/ /g,'').split('\n').map(row => row.trim().toUpperCase().split(''));
+                    width = m[0].length;
+                    height = m.length;
+                    matrix = m[0].map((x, i) => m.map(x => x[i]));
+                    let children = [];
+                    let y = 0;
+                    for (const row of m) {
+                        let x = 0;
+                        for (const c of row) {
+                            let cell = document.createElement('div');
+                            cell.textContent = c;
+                            cell.id = `cell-${x}-${y}`;
+                            children.push(cell);
+                            ++x;
+                        }
+                        ++y;
+                    }
+                    el.matrix.style.gridTemplateColumns = 'min-content '.repeat(m[0].length);
+                    el.matrix.replaceChildren(...children);
+                }
+
+                function main() {
+                    el.word = document.querySelector('#word');
+                    el.word.addEventListener('input', onWordChange);
+                    el.word.focus();
+                    el.pasted = document.querySelector('#pasted');
+                    el.pasted.addEventListener('input', buildMatrix);
+                    el.matrix = document.querySelector('#matrix');
+                    buildMatrix();
+                }
+
+                window.addEventListener('load', main);
+
+            })(window);
+        </script>
+        <style type="text/css">
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+                -webkit-box-sizing: border-box;
+                -moz-box-sizing: border-box;
+            }
+            :root {
+                --bg-color: #181818;
+                --fg-color: #e8e8e8;
+                --field-color: #f8f8f8;
+                --highlight-color: rgba(11, 226, 22, 0.723);
+            }
+            html {
+                background-color: var(--bg-color);
+                color: var(--fg-color);
+                font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+                font-size: 11pt;
+            }
+            div {
+                margin: 5px auto 0 5px;
+            }
+            input, textarea {
+                background-color: var(--field-color);
+                border: 1px solid var(--bg-color);
+                padding: 5px;
+            }
+            input {
+                min-width: 20em;
+            }
+            textarea {
+                min-width: 24em;
+                min-height: 40ex;
+            }
+            #matrix {
+                display: grid;
+                margin-bottom: 1ex;
+                padding: 5px 0;
+            }
+            #matrix > div {
+                text-align: center;
+                font-family: monospace;
+                width: 17px;
+                height: 17px;
+                margin: 0;
+            }
+            .highlight {
+                background-color: var(--highlight-color);
+            }
+        </style>
+    </head>
+    <body>
+        <div>
+            <input type="text" name="word" id="word" autocomplete="off" placeholder="Type word to find ..." />
+        </div>
+        <div id="matrix"></div>
+        <div>
+            <textarea id="pasted" placeholder="Paste matrix here ..."></textarea>
+        </div>
+    </body>
+</html>
