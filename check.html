@@ -3,11 +3,12 @@
     <head>
         <script type="text/javascript">
             (function(window) {
+                const HOP = 1;
                 const DIRECTIONS = [
-                    { dx: -1, dy: 0 },
-                    { dx: +1, dy: 0 },
-                    { dx: 0, dy: -1 },
-                    { dx: 0, dy: +1 },
+                    { dx: -HOP, dy: 0 },
+                    { dx: +HOP, dy: 0 },
+                    { dx: 0, dy: -HOP },
+                    { dx: 0, dy: +HOP },
                 ];
 
                 let el = {};
@@ -15,26 +16,20 @@
                 let width = 0;
                 let height = 0;
 
-                function clearHighlights() {
-                    for (const c of el.matrix.children) {
-                        c.classList.remove('highlight');
-                    }
-                }
-
                 function traverseTree(x, y, tail, path) {
                     if (matrix[x][y] !== tail[0]) {
                         return false;
                     }
-                    path.push({x: x, y: y});
+                    path.push({ x: x, y: y });
                     tail.shift();
                     if (tail.length === 0) {
                         return true;
                     }
                     let hasPath = false;
                     for (const d of DIRECTIONS) {
-                        let { dx, dy } = d;
-                        let i = (width + x + dx) % width;
-                        let j = (height + y + dy) % height;
+                        const { dx, dy } = d;
+                        const i = (x + dx + width) % width;
+                        const j = (y + dy + height) % height;
                         hasPath ||= traverseTree(i, j, [...tail], path);
                     }
                     if (hasPath) {
@@ -44,7 +39,7 @@
                     return false;
                 }
 
-                function findWord(word) {
+                function getWordPaths(word) {
                     word = word.split('');
                     let paths = [];
                     for (let x = 0; x < width; ++x) {
@@ -59,10 +54,15 @@
                     return paths;
                 }
 
-                function onWordChange(e) {
+                function clearHighlights() {
+                    for (const c of el.matrix.children) {
+                        c.classList.remove('highlight');
+                    }
+                }
+
+                function updateHighlighting(word) {
                     clearHighlights();
-                    e.target.value = e.target.value.toUpperCase();
-                    let paths = findWord(e.target.value);
+                    const paths = getWordPaths(word);
                     for (const path of paths) {
                         for (const coord of path) {
                             let cell = document.querySelector(`#cell-${coord.x}-${coord.y}`);
@@ -71,11 +71,19 @@
                     }
                 }
 
+                function onWordChange(e) {
+                    updateHighlighting(e.target.value.toUpperCase());
+                }
+
+                function transposed(m) {
+                    return m[0].map((x, i) => m.map(x => x[i]));
+                }
+
                 function buildMatrix() {
                     let m = el.pasted.value.replace(/ /g,'').split('\n').map(row => row.trim().toUpperCase().split(''));
                     width = m[0].length;
                     height = m.length;
-                    matrix = m[0].map((x, i) => m.map(x => x[i]));
+                    matrix = transposed(m);
                     let children = [];
                     let y = 0;
                     for (const row of m) {
@@ -89,8 +97,10 @@
                         }
                         ++y;
                     }
+                    el.matrix.style.gridTemplateRows = 'min-content '.repeat(m.length);
                     el.matrix.style.gridTemplateColumns = 'min-content '.repeat(m[0].length);
                     el.matrix.replaceChildren(...children);
+                    updateHighlighting(el.word.value);
                 }
 
                 function main() {
@@ -99,6 +109,7 @@
                     el.word.focus();
                     el.pasted = document.querySelector('#pasted');
                     el.pasted.addEventListener('input', buildMatrix);
+                    el.pasted.addEventListener('paste', () => {el.word.focus();});
                     el.matrix = document.querySelector('#matrix');
                     buildMatrix();
                 }
@@ -141,6 +152,11 @@
             textarea {
                 min-width: 24em;
                 min-height: 40ex;
+                letter-spacing: 0.5em;
+            }
+            #word {
+                text-transform: uppercase;
+                font-family: monospace;
             }
             #matrix {
                 display: grid;
@@ -166,6 +182,6 @@
         <div id="matrix"></div>
         <div>
             <textarea id="pasted" placeholder="Paste matrix here ..."></textarea>
-        </div>
+        </div>    
     </body>
 </html>
