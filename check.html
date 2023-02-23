@@ -85,20 +85,16 @@
                     height = m.length;
                     matrix = transposed(m);
                     let children = [];
-                    let y = 0;
-                    for (const row of m) {
-                        let x = 0;
-                        for (const c of row) {
+                    for (let y = 0; y < height; ++y) {
+                        for (let x = 0; x < width; ++x) {
                             let cell = document.createElement('div');
-                            cell.textContent = c;
+                            cell.textContent = matrix[x][y];
                             cell.id = `cell-${x}-${y}`;
                             children.push(cell);
-                            ++x;
                         }
-                        ++y;
                     }
-                    el.matrix.style.gridTemplateRows = 'min-content '.repeat(m.length);
-                    el.matrix.style.gridTemplateColumns = 'min-content '.repeat(m[0].length);
+                    el.matrix.style.gridTemplateColumns = 'min-content '.repeat(width);
+                    el.matrix.style.gridTemplateRows = 'min-content '.repeat(height);
                     el.matrix.replaceChildren(...children);
                     updateHighlighting(el.word.value);
                 }
