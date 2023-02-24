@@ -8,7 +8,7 @@ The Python script [gen.py](https://github.com/607011/wordsearch/blob/main/gen.py
 python3 gen.py 15 14 1 < wordlist.txt
 ```
 
-to produce a matrix 15 columns wide and 14 rows high. The `1` tells the script to a direct neighbor of the current cell to place the next letter; `2` would choose the one after the next, and so on.
+to produce a matrix 15 columns wide and 14 rows high. The `1` tells the script to choose a direct neighbor of the current cell to place the next letter; `2` would choose the one after the next, and so on.
 
 ## Word Checker
 
