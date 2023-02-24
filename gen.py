@@ -22,7 +22,12 @@ class WordsearchGenerator:
             if 'nextDirectionAlgorithm' in kwargs else 'shuffle'
         if self.forbidSameDirection and self.nextDirectionAlgorithm == 'preferright':
             print('WARNING: "preferright" algorithm does not respect `forbidSameDirection` attribute.', file=sys.stderr)
-
+        if 'sort' in kwargs:
+            if kwargs['sort'] == 'ascending':
+                self.words = sorted(self.words, key=len, reverse=False)
+            elif kwargs['sort'] == 'descending':
+                self.words = sorted(self.words, key=len, reverse=True)
+    
     def dump(self):
         for row in zip(*self.matrix):
             print(''.join(row))
@@ -136,8 +141,7 @@ def main(w: int = 7, h: int = 7, hop: int = 1):
             .replace('Ü', 'UE')\
             .replace('ß', 'SS')
         words.append(word.rstrip())
-    words = sorted(words, key=len, reverse=True)
-    wsg = WordsearchGenerator(w, h, words, hop=hop, nextDirectionAlgorithm='shuffle')
+    wsg = WordsearchGenerator(w, h, words, hop=hop, nextDirectionAlgorithm='shuffle', sort=None)
     wsg.construct()
     print()
     wsg.dump()
