@@ -1,5 +1,15 @@
 # Wordsearch
 
+## Riddle Generator
+
+The Python script [gen.py](https://github.com/607011/wordsearch/blob/main/gen.py) generates word search puzzles from a word list read from stdin. Use it like
+
+```
+python3 gen.py 15 14 1 < wordlist.txt
+```
+
+to produce a matrix 15 columns wide and 14 rows high. 
+
 ## Word Checker
 
 The Word Checker (see file [check.html](https://github.com/607011/wordsearch/blob/main/check.html)) is a single-page web application in which you can paste a matrix. You can then search the matrix for words. 
