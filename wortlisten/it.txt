@@ -1,3 +1,4 @@
+Adware
 Netzwerkkabel
 Druckerwarteschlange
 Informatik
@@ -23,6 +24,7 @@ Cyberkriminalität
 Cyberspace
 Datensicherheit
 Privacy
+Qubit
 DHCP
 DNS
 DOS
@@ -34,6 +36,9 @@ Display
 LCD
 OLED
 Bluray
+Bluetooth
+Btrfs
+Breitbandausbau
 Apple
 Microsoft
 Oracle
@@ -65,3 +70,20 @@ JPEG
 Nvidia
 Kryptografie
 IO
+Cplusplus
+Ada
+Lovelace
+Barebone
+Beacon
+Benchmark
+Blog
+BYOD
+Chat
+Cinebench
+Linux
+Codec
+Controller
+Coremark
+Zugriffsrecht
+Zugangsdaten
+Zertifikat
