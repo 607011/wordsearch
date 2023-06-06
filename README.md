@@ -24,7 +24,7 @@ to produce a matrix 15 columns wide and 14 rows high. The `1` tells the script t
 
 - Words can cross each other, including themselves.
 
-- And particularly nasty: words can continue on the opposite edge.
+- And particularly nasty: you must think of the matrix as a torus, i.e. words can continue on the opposite edge.
 
 - Ä = AE, Ö = OE, Ü = UE, ß = SS
 
