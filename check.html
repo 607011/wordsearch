@@ -124,6 +124,7 @@
             }
             :root {
                 --bg-color: #181818;
+                --grid-color: #333;
                 --fg-color: #e8e8e8;
                 --field-color: #f8f8f8;
                 --highlight-color: rgba(11, 226, 22, 0.723);
@@ -162,9 +163,10 @@
             #matrix > div {
                 text-align: center;
                 font-family: monospace;
-                width: 17px;
-                height: 17px;
+                width: 22px;
+                height: 22px;
                 margin: 0;
+                border: 1px solid var(--grid-color);
             }
             .highlight {
                 background-color: var(--highlight-color);
