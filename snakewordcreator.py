@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-import sys
 import random
+from typing import Union
 from copy import deepcopy
 
 
@@ -9,63 +9,65 @@ class SnakeWordPuzzleGenerator:
     EMPTY = " "
     ALL_LETTERS = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-    matrix = None
-
     def __init__(self, words: list[str], args):
         self.words = words
         self.w = args.width
         self.h = args.height
         self.forbid_wrap = args.forbid_wrap
-        self.hop = args.hop
-        self.weights = [args.right_weight, 1, 1, 1]
-        self.forbid_same_direction = args.forbid_same_direction
-        self.max_tries = args.max_tries
-        self.next_direction_algorithm = args.next_direction
-        if (
-            self.forbid_same_direction
-            and self.next_direction_algorithm == "preferright"
-        ):
-            print(
-                'WARNING: "preferright" algorithm does not respect `forbid_same_direction` attribute.',
-                file=sys.stderr,
-            )
-        if args.sort == "ascending":
-            self.words = sorted(self.words, key=len, reverse=False)
-        elif args.sort == "descending":
-            self.words = sorted(self.words, key=len, reverse=True)
-
-    def dump(self):
-        for row in zip(*self.matrix):
-            print("".join(row))
-
-    def construct(self) -> None:
+        self.hop = args.hop if args.hop else 1
+        self.right_weight = args.right_weight if args.right_weight else 1
+        self.weights = [self.right_weight, 1, 1, 1]
         UP, RIGHT, DOWN, LEFT = (
             (0, -self.hop),
             (+self.hop, 0),
             (0, +self.hop),
             (-self.hop, 0),
         )
+        self.directions = [RIGHT, LEFT, DOWN, UP]
+        self.forbid_same_direction = args.forbid_same_direction
+        self.max_tries = args.max_tries
+        if args.sort == "ascending":
+            self.words = sorted(self.words, key=len, reverse=False)
+        elif args.sort == "descending":
+            self.words = sorted(self.words, key=len, reverse=True)
+
+    def dump(self) -> None:
+        for y in range(self.h):
+            for x in range(self.w):
+                if (x, y) in self.randomly_filled:
+                    print(f"\u001b[31;1m{self.matrix[x][y]}\u001b[0m", end="")
+                else:
+                    print(f"\u001b[32;1m{self.matrix[x][y]}\u001b[0m", end="")
+            print()
+
+    def construct(self) -> None:
         self.matrix = [x[:] for x in [[self.EMPTY] * self.h] * self.w]
         self.emplaced_words = []
 
         def get_random_direction(
             x: int, y: int, current_letter: str, invalid_direction=None
-        ) -> tuple[int, int]:
-            if self.next_direction_algorithm == "shuffle":
-                directions = [RIGHT, LEFT, DOWN, UP]
+        ) -> Union[tuple[int, int], tuple[None, None]]:
+            if any(w != 1 for w in self.weights):
+                remaining_directions = self.directions.copy()
+                remaining_weights = self.weights.copy()
+                directions = []
+                while not all(d in directions for d in self.directions):
+                    choice = random.choices(
+                        remaining_directions,
+                        weights=remaining_weights,
+                        k=1,
+                    )[0]
+                    idx = remaining_directions.index(choice)
+                    remaining_directions.pop(idx)
+                    remaining_weights.pop(idx)
+                    directions.append(choice)
+
+            else:
+                directions = self.directions.copy()
                 if invalid_direction is not None:
                     directions.remove(invalid_direction)
                 random.shuffle(directions)
-            elif self.next_direction_algorithm == "preferright":
-                directions = []
-                while not all(d in directions for d in [RIGHT, LEFT, DOWN, UP]):
-                    choice = random.choices(
-                        [RIGHT, LEFT, DOWN, UP],
-                        weights=self.weights,
-                        k=1,
-                    )[0]
-                    if choice not in directions:
-                        directions.append(choice)
+
             for direction in directions:
                 dx, dy = direction
                 if self.forbid_wrap and (
@@ -78,25 +80,24 @@ class SnakeWordPuzzleGenerator:
                 letter = self.matrix[(x + dx) % self.w][(y + dy) % self.h]
                 if letter is self.EMPTY or letter is current_letter:
                     return direction
+
             return None, None
 
-        def get_random_xy() -> tuple[int, int]:
-            max_iter = self.w * self.h  # practical value
-            i = 0
-            while i < max_iter:
+
+        def get_random_xy(first_letter: str) -> Union[tuple[int, int], tuple[None, None]]:
+            for _ in range(self.w * self.h):
                 x = random.randrange(self.w)
                 y = random.randrange(self.h)
-                if self.matrix[x][y] is self.EMPTY:
+                if self.matrix[x][y] in [self.EMPTY, first_letter]:
                     return x, y
-                i += 1
             return None, None
 
 
         for word in self.words:
-            try_counter = 0
-            while try_counter < self.max_tries:
+            first_letter = word[0]
+            for _ in range(self.max_tries):
                 old_matrix = deepcopy(self.matrix)
-                pos = get_random_xy()
+                pos = get_random_xy(first_letter)
                 if None in pos:
                     break
                 x, y = pos
@@ -120,18 +121,17 @@ class SnakeWordPuzzleGenerator:
                 if dx is not None:
                     self.emplaced_words.append(word)
                     break
-                try_counter += 1
                 self.matrix = old_matrix
 
-        self.num_randomly_filled = 0
+        self.randomly_filled = []
         for x in range(self.w):
             for y in range(self.h):
                 if self.matrix[x][y] == self.EMPTY:
                     self.matrix[x][y] = random.choice(self.ALL_LETTERS)
-                    self.num_randomly_filled += 1
+                    self.randomly_filled.append((x, y))
 
 
-    def write_svg(self, filename):
+    def write_svg(self, filename: str):
         scale = 44
         stroke = "black"
         stroke_width = 2
@@ -176,9 +176,8 @@ class SnakeWordPuzzleGenerator:
             svg.write("</svg>")
 
 
-def main():
+def main() -> None:
     from argparse import ArgumentParser
-
     parser = ArgumentParser(description="Snake word puzzle generator.", add_help=False)
     parser.add_argument(
         "-?", "--help", action="help", help="Show this help message and exit."
@@ -208,14 +207,6 @@ def main():
         type=str,
         choices=["ascending", "descending"],
         help="Sort word list in `ascending` or `descending` order.",
-    )
-    parser.add_argument(
-        "-d",
-        "--next-direction",
-        type=str,
-        default="shuffle",
-        choices=["shuffle", "preferright"],
-        help="Algorithm to determine next direction.",
     )
     parser.add_argument(
         "--right-weight",
@@ -256,7 +247,7 @@ def main():
     for word in gen.emplaced_words:
         print(f"- {word}")
     print(
-        f'\nRandomly filled {gen.num_randomly_filled} cell{"s" if gen.num_randomly_filled != 1 else ""} ({100.0*gen.num_randomly_filled/(gen.w*gen.h):.1f}%)\n'
+        f'\nRandomly filled {len(gen.randomly_filled)} cell{"s" if len(gen.randomly_filled) != 1 else ""} ({100.0*len(gen.randomly_filled)/(gen.w*gen.h):.1f}%)\n'
     )
     gen.dump()
     if args.svg is not None:
