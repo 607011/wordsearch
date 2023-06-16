@@ -4,7 +4,7 @@ This repository contains two related projects to produce and verify searchword p
 
 ## Riddle Generator
 
-The Python script [gen.py](https://github.com/607011/wordsearch/blob/main/gen.py) generates word search puzzles from a word list read from stdin. Use it like e.g.
+The Python script [snakewordcreator.py](https://github.com/607011/wordsearch/blob/main/snakewordcreator.py) generates word search puzzles from a word list read from stdin. Use it like e.g.
 
 ```
 python3 ./snakewordcreator.py \
@@ -16,7 +16,7 @@ python3 ./snakewordcreator.py \
 
 to produce a matrix 15 columns wide and 14 rows high. The `1` tells the script to choose a direct neighbor of the current cell to place the next letter; `2` would choose the one after the next, and so on.
 
-### The Basic Rules
+### Basic Rules
 
 - The words are read horizontally and vertically: up and down and left and right, but not diagonally.
 
