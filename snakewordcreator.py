@@ -3,7 +3,15 @@
 import random
 from typing import Union
 from copy import deepcopy
+import platform
 
+def isWin11() -> bool:
+    return platform.system() == "Windows" and int(platform.version().split('.')[2]) >= 22000
+
+class ANSI:
+    GREEN_BOLD = "\u001b[32;1m" if isWin11() else ""
+    RED_BOLD = "\u001b[31;1m" if isWin11() else ""
+    STANDARD = "\u001b[0m" if isWin11() else ""
 
 class SnakeWordPuzzleGenerator:
     EMPTY = " "
@@ -35,9 +43,9 @@ class SnakeWordPuzzleGenerator:
         for y in range(self.h):
             for x in range(self.w):
                 if (x, y) in self.randomly_filled:
-                    print(f"\u001b[31;1m{self.matrix[x][y]}\u001b[0m", end="")
+                    print(f"{ANSI.RED_BOLD}{self.matrix[x][y]}{ANSI.STANDARD}", end="")
                 else:
-                    print(f"\u001b[32;1m{self.matrix[x][y]}\u001b[0m", end="")
+                    print(f"{ANSI.GREEN_BOLD}{self.matrix[x][y]}{ANSI.STANDARD}", end="")
             print()
 
     def construct(self) -> None:
