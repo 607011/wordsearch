@@ -80,14 +80,14 @@
                 }
 
                 function buildMatrix() {
-                    let m = el.pasted.value.replace(/ /g,'').split('\n').map(row => row.trim().toUpperCase().split(''));
+                    const m = el.pasted.value.replace(/ /g,'').split('\n').map(row => row.trim().toUpperCase().split(''));
                     width = m[0].length;
                     height = m.length;
                     matrix = transposed(m);
-                    let children = [];
+                    const children = [];
                     for (let y = 0; y < height; ++y) {
                         for (let x = 0; x < width; ++x) {
-                            let cell = document.createElement('div');
+                            const cell = document.createElement('div');
                             cell.textContent = matrix[x][y];
                             cell.id = `cell-${x}-${y}`;
                             children.push(cell);
