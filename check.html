@@ -104,8 +104,10 @@
                     el.word.addEventListener('input', onWordChange);
                     el.word.focus();
                     el.pasted = document.querySelector('#pasted');
-                    el.pasted.addEventListener('input', buildMatrix);
-                    el.pasted.addEventListener('paste', () => {el.word.focus();});
+                    el.pasted.addEventListener('input', () => {
+                        buildMatrix();
+                        el.word.focus();
+                    });
                     el.matrix = document.querySelector('#matrix');
                     buildMatrix();
                 }
