@@ -17,7 +17,7 @@ class SnakeWordPuzzleGenerator:
     EMPTY = " "
     ALL_LETTERS = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-    def __init__(self, words: list[str], args):
+    def __init__(self, words, args):
         self.words = words
         self.w = args.width
         self.h = args.height
@@ -39,7 +39,7 @@ class SnakeWordPuzzleGenerator:
         elif args.sort == "descending":
             self.words = sorted(self.words, key=len, reverse=True)
 
-    def dump(self) -> None:
+    def dump(self):
         for y in range(self.h):
             for x in range(self.w):
                 if (x, y) in self.randomly_filled:
@@ -48,16 +48,16 @@ class SnakeWordPuzzleGenerator:
                     print(f"{ANSI.GREEN_BOLD}{self.matrix[x][y]}{ANSI.STANDARD}", end="")
             print()
 
-    def construct(self) -> None:
+    def construct(self):
         self.matrix = [x[:] for x in [[self.EMPTY] * self.h] * self.w]
         self.emplaced_words = []
 
         def get_random_direction(
             x: int, y: int, current_letter: str, invalid_direction=None
-        ) -> Union[tuple[int, int], tuple[None, None]]:
+        ):
             if any(w != 1 for w in self.weights):
-                remaining_directions = self.directions.copy()
-                remaining_weights = self.weights.copy()
+                remaining_directions = self.directions[:]
+                remaining_weights = self.weights[:]
                 directions = []
                 while not all(d in directions for d in self.directions):
                     choice = random.choices(
@@ -71,7 +71,7 @@ class SnakeWordPuzzleGenerator:
                     directions.append(choice)
 
             else:
-                directions = self.directions.copy()
+                directions = self.directions[:]
                 if invalid_direction is not None:
                     directions.remove(invalid_direction)
                 random.shuffle(directions)
@@ -92,7 +92,7 @@ class SnakeWordPuzzleGenerator:
             return None, None
 
 
-        def get_random_xy(first_letter: str) -> Union[tuple[int, int], tuple[None, None]]:
+        def get_random_xy(first_letter):
             for _ in range(self.w * self.h):
                 x = random.randrange(self.w)
                 y = random.randrange(self.h)
@@ -139,7 +139,7 @@ class SnakeWordPuzzleGenerator:
                     self.randomly_filled.append((x, y))
 
 
-    def write_svg(self, filename: str):
+    def write_svg(self, filename):
         scale = 44
         stroke = "black"
         stroke_width = 2
@@ -184,7 +184,7 @@ class SnakeWordPuzzleGenerator:
             svg.write("</svg>")
 
 
-def main() -> None:
+def main():
     from argparse import ArgumentParser
     parser = ArgumentParser(description="Snake word puzzle generator.", add_help=False)
     parser.add_argument(
