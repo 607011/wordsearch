@@ -16,6 +16,8 @@ python3 ./snakewordcreator.py \
 
 to produce a matrix 15 columns wide and 14 rows high. The `1` tells the script to choose a direct neighbor of the current cell to place the next letter; `2` would choose the one after the next, and so on.
 
+If the script produces a **`TypeError: 'type' object is not subscriptable`**, you’re probably running an outdated Python version. Please consider updating your Python installation, or if not possible e.g. if you’re using Windows 7, check out the branch „python3.8“ (`git checkout python3.8`) to get an edition of the script that can be executed with Python 3.8 (and possibly older versions).
+
 ### Basic Rules
 
 - The words are read horizontally and vertically: up and down and left and right, but not diagonally.
